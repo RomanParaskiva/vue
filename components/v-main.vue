@@ -108,7 +108,9 @@ export default {
   },
   methods: {
     handleInput (e) {
+      
       this.filterPartners = [...new Set(this.partners)]
+      this.emptySearch = false
       if (e.target.value.length > 1) {
         this.filterPartners = this.partners.filter((item) => {
           return item.company.toLowerCase().includes(e.target.value.toLowerCase()) || item.address.toLowerCase().includes(e.target.value.toLowerCase())
@@ -119,7 +121,7 @@ export default {
       }
     },
     handleChange (e) {
-      console.log(e)
+      this.emptySearch = false
       if (!e.target.value === 'Type') {
         this.filterPartners = [...new Set(this.partners)]
         this.filterPartners = this.partners.filter((item) => {
