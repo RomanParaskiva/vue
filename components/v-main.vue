@@ -108,7 +108,6 @@ export default {
   },
   methods: {
     handleInput (e) {
-      
       this.filterPartners = [...new Set(this.partners)]
       this.emptySearch = false
       if (e.target.value.length > 1) {
@@ -121,6 +120,7 @@ export default {
       }
     },
     handleChange (e) {
+      console.log(e.target.value)
       this.emptySearch = false
       if (!e.target.value === 'Type') {
         this.filterPartners = [...new Set(this.partners)]
