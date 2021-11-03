@@ -12,37 +12,45 @@
           partners in your area.
         </p>
 
-        <div class='input__wrapper'>
+        <div class="input__wrapper">
           <input
-            id='search'
-            type='text'
-            name='search'
-            placeholder='Search by company name or adress..'
-            autocomplete='off'
-            v-model="searchQuery"
+            id="search"
+            type="text"
+            name="search"
+            placeholder="Search by company name or adress.."
+            autocomplete="off"
+            @input="handleInput($event)"
           />
           <span>
-            <img src='~/assets/img/search-ico.svg' alt='search' srcset='' />
+            <img src="~/assets/img/search-ico.svg" alt="search" srcset="" />
           </span>
         </div>
 
-        <div class='selects__wrapper'>
-          <vDataList :init-list='typeList' :options="types" />
-          <vDataList :init-list='countryList' />
-          <vDataList :init-list='stateList' />
+        <div class="selects__wrapper">
+          <vDataList :init-list="typeList" :options="types" @selectType="handleChange($event)"/>
+          <vDataList :init-list="countryList" @selectType="handleChange($event)"/>
+          <vDataList :init-list="stateList" @selectType="handleChange($event)"/>
         </div>
       </div>
     </div>
-    <div v-if="!loading" class="partners-list">
-      <transition-group name="list" tag="div" appear>
-        <v-single-partner v-for="partner in getPartners" :key="partner.id" :init-partner="partner" :search-query="getQuery"/>
-      </transition-group>
+    <div v-if="!loading">
+      <div class="partners-list">
+        <transition-group name="list" tag="p" appear>
+          <v-single-partner
+            v-for="partner in filterPartners"
+            :key="partner.id"
+            :init-partner="partner"
+          />
+        </transition-group>
+      </div>
+      <div v-show="emptySearch" style="text-align:center;">
+        Your search parameters did not match any partners. Please try different
+        search.
+      </div>
     </div>
     <transition-group v-else class="load-message" appear>
-      <p>Please wait...</p>
+      <p key="load">Please wait...</p>
     </transition-group>
-    <div v-show="emptySearch">Your search parameters did not match any
-partners. Please try different search.</div>
   </div>
 </template>
 
@@ -74,9 +82,9 @@ export default {
         class: 'twin right'
       },
       loading: false,
-      searchQuery: '',
       types: [],
       partners: [],
+      filterPartners: [],
       emptySearch: false
     }
   },
@@ -90,34 +98,43 @@ export default {
       this.partners = data.res
       this.partners.forEach((p) => {
         p.hidden = true
-        if (!this.types.includes(p.status)) { this.types.push(p.status) }
+        if (!this.types.includes(p.status)) {
+          this.types.push(p.status)
+        }
       })
+      this.filterPartners = [...new Set(this.partners)]
       this.loading = false
     }
   },
-  computed: {
-    getPartners () {
-      if (this.searchQuery.length > 1) {
-        const str = this.searchQuery.toLowerCase()
-        this.partners.forEach((partner) => {
-          if (partner.address.toLowerCase().includes(str) || partner.company.toLowerCase().includes(str)) {
-            partner.hidden = true
-          } else {
-            partner.hidden = false
-          }
+  methods: {
+    handleInput (e) {
+      this.filterPartners = [...new Set(this.partners)]
+      if (e.target.value.length > 1) {
+        this.filterPartners = this.partners.filter((item) => {
+          return item.company.toLowerCase().includes(e.target.value.toLowerCase()) || item.address.toLowerCase().includes(e.target.value.toLowerCase())
         })
-        return this.partners
+        this.filterPartners.length === 0 ? this.emptySearch = true : this.emptySearch = false
       } else {
-        this.partners.forEach((partner) => { partner.hidden = true })
-        return this.partners
+        this.filterPartners = [...new Set(this.partners)]
       }
     },
-    getQuery () { return this.searchQuery }
+    handleChange (e) {
+      console.log(e)
+      if (!e.target.value === 'Type') {
+        this.filterPartners = [...new Set(this.partners)]
+        this.filterPartners = this.partners.filter((item) => {
+          return item.status.toLowerCase().includes(e.target.value.toLowerCase())
+        })
+        this.filterPartners.length === 0 ? this.emptySearch = true : this.emptySearch = false
+      } else {
+        this.filterPartners = [...new Set(this.partners)]
+      }
+    }
   }
 }
 </script>
 
-<style lang='scss'>
+<style lang="scss">
 .list-enter-active,
 .list-leave-active {
   transition: all 1s ease;
@@ -130,7 +147,7 @@ export default {
 .main__wrapper {
   width: 100%;
   height: auto;
-  background-image: url('~/assets/img/bg.png');
+  background-image: url("~/assets/img/bg.png");
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
@@ -204,15 +221,15 @@ export default {
   }
 }
 
-.partners-list{
+.partners-list {
   padding: 50px 2rem;
 }
 
-.load-message{
+.load-message {
   width: 100%;
   display: flex;
 
-  p{
+  p {
     margin: 20px auto;
     font-size: 20px;
     font-weight: 700;

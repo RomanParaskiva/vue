@@ -1,5 +1,5 @@
 <template>
-    <div v-show="partner.hidden" class="conatainer partner">
+    <div v-show="partner.hidden" class="conatainer partner" :key="partner.id">
       <div class="partner__logo">
         <img :src="partner.logo" alt="logo" />
       </div>
