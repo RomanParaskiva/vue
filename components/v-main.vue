@@ -122,7 +122,7 @@ export default {
     handleChange (e) {
       console.log(e.target.value)
       this.emptySearch = false
-      if (!e.target.value === 'Type') {
+      if (e.target.value !== 'Type') {
         this.filterPartners = [...new Set(this.partners)]
         this.filterPartners = this.partners.filter((item) => {
           return item.status.toLowerCase().includes(e.target.value.toLowerCase())
